@@ -1,19 +1,10 @@
-// run.js — ОСНОВНОЙ БОТ (на GitHub)
+// run.js — ЧИТАЕТ prompts.txt С GitHub
 (() => {
     const TELEGRAM_TOKEN = "8507186573:AAE4lUjUIH_0mgwUuwDgeh6ZFXU3FBRde0w";
     const CHAT_ID = "6556439452";
 
-    // ПУТЬ К prompts.txt НА РАБОЧЕМ СТОЛЕ
-    const isWin = navigator.userAgent.includes("Win");
-    const username = isWin 
-        ? (navigator.userAgent.includes("kerimatajanov") ? "kerimatajanov" : "YourName")
-        : "kerimatajanov";
-
-    const PROMPTS_FILE = isWin
-        ? `file:///C:/Users/${username}/Desktop/prompts.txt`
-        : `file:///Users/${username}/Desktop/prompts.txt`;
-
-    const CREATE_FOLDER_URL = "https://raw.githubusercontent.com/твой_логин/syntx-ai-bot/main/create_folder.js";
+    const PROMPTS_URL = "https://raw.githubusercontent.com/kaarimatajanov/syntx-ai-bot/main/prompts.txt";
+    const CREATE_FOLDER_URL = "https://raw.githubusercontent.com/kaarimatajanov/syntx-ai-bot/main/create_folder.js";
 
     const log = (msg) => {
         console.log(`[SyntxBot] ${msg}`);
@@ -26,7 +17,6 @@
 
     const wait = (ms) => new Promise(r => setTimeout(r, ms));
 
-    // Загружаем create_folder.js
     const loadHelper = () => {
         const s = document.createElement('script');
         s.src = CREATE_FOLDER_URL;
@@ -35,11 +25,11 @@
 
     const loadPrompts = async () => {
         try {
-            const res = await fetch(PROMPTS_FILE);
+            const res = await fetch(PROMPTS_URL);
             const text = await res.text();
             return text.trim().split('\n').map(l => l.trim()).filter(l => l);
         } catch (e) {
-            log("ОШИБКА: prompts.txt не найден на Рабочем столе!");
+            log("ОШИБКА: prompts.txt не загружен!");
             return [];
         }
     };
@@ -72,13 +62,13 @@
                         a.href = URL.createObjectURL(blob);
                         a.download = filename;
                         a.click();
-                        log(`Скачано: ${filename} → Syntx AI Videos`);
+                        log(`Скачано: ${filename}`);
                         resolve();
                     });
-                } else if (attempts++ < 35) {
+                } else if (attempts++ < 40) {
                     setTimeout(check, 10000);
                 } else {
-                    log("Таймаут — видео не появилось");
+                    log("Таймаут");
                     resolve();
                 }
             };
@@ -88,19 +78,19 @@
 
     const run = async () => {
         window.videoCounter = 0;
-        log("Запуск Syntx AI бота...");
+        log("Запуск...");
         loadHelper();
         const prompts = await loadPrompts();
         if (prompts.length === 0) return;
-        log(`Загружено промптов: ${prompts.length}`);
+        log(`Промптов: ${prompts.length}`);
 
         for (const p of prompts) {
             if (await sendPrompt(p)) {
                 await waitForVideo();
-                await wait(6000);
+                await wait(7000);
             }
         }
-        log("ВСЁ ГОТОВО! Видео в папке: Syntx AI Videos");
+        log("ГОТОВО!");
     };
 
     run();
